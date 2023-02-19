@@ -14,31 +14,8 @@ class DefaultInfiniteLoading extends StatefulWidget {
 }
 
 class _DefaultInfiniteLoadingState extends State<DefaultInfiniteLoading> {
-  final ScrollController _controller = ScrollController();
   List<Pokemon> _pokemons = [];
   String? _nextPageLink;
-
-  @override
-  void initState() {
-    _controller.addListener(() {
-      if (_controller.position.maxScrollExtent == _controller.offset) {
-        _add();
-      }
-    });
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _add() {
-    if (_nextPageLink != null && _nextPageLink != null) {
-      _fetchPokemon(Uri.parse(_nextPageLink!));
-    }
-  }
 
   void _fetchPokemon(Uri uri) async {
     http.Response _res = await http.get(uri);
