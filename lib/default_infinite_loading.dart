@@ -3,65 +3,64 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_application_1/main.dart';
 import 'package:flutter_application_1/models/pokemon.dart';
+import 'package:flutter_application_1/provider/count_state_provider.dart';
+import 'package:flutter_application_1/provider/pokemon_state_provier.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
-class DefaultInfiniteLoading extends StatefulWidget {
+class DefaultInfiniteLoading extends ConsumerStatefulWidget {
   const DefaultInfiniteLoading({super.key});
 
   @override
-  State<DefaultInfiniteLoading> createState() => _DefaultInfiniteLoadingState();
+  _DefaultInfiniteLoadingState createState() => _DefaultInfiniteLoadingState();
 }
 
-class _DefaultInfiniteLoadingState extends State<DefaultInfiniteLoading> {
-  List<Pokemon> _pokemons = [];
-  String? _nextPageLink;
-
-  void _fetchPokemon(Uri uri) async {
-    http.Response _res = await http.get(uri);
-
-    Map<String, dynamic> data = jsonDecode(_res.body);
-
-    List<dynamic> dd =
-        data['results'].map((item) => Pokemon.fromJson(item)).toList();
-
-    setState(() {
-      _pokemons.addAll(dd.map((item) => item as Pokemon).toList());
-      _nextPageLink = data['next'];
-    });
-  }
-
+class _DefaultInfiniteLoadingState
+    extends ConsumerState<DefaultInfiniteLoading> {
   @override
   Widget build(BuildContext context) {
+    final String value = ref.watch(helloWorldProvider);
+    final int count = ref.watch(countStateProvider);
+    final PokemonState pokemon = ref.watch(pokemonStateProvider);
+
     return Scaffold(
       backgroundColor: Colors.cyan,
       appBar: AppBar(
         backgroundColor: Colors.redAccent,
+        title: Text('$count'),
       ),
-      body: _pokemons.isEmpty
-          ? Container(
+      body: pokemon.pokemons.isEmpty
+          ? SizedBox(
               width: double.infinity,
               height: 100.0,
               child: ElevatedButton(
                 onPressed: () {
-                  _fetchPokemon(Uri.https('pokeapi.co', '/api/v2/pokemon'));
+                  ref
+                      .read(pokemonStateProvider.notifier)
+                      .fetchPokemon(Uri.https('pokeapi.co', '/api/v2/pokemon'));
                 },
-                child: Text('GET POKEMON'),
+                child: Text(value),
               ),
             )
           : RefreshIndicator(
               onRefresh: () async {
-                if (_nextPageLink != null && _nextPageLink != null) {
-                  _fetchPokemon(Uri.parse(_nextPageLink!));
+                if (pokemon.nextPageLink != null) {
+                  ref
+                      .read(pokemonStateProvider.notifier)
+                      .fetchPokemon(Uri.parse(pokemon.nextPageLink!));
                 } else {
-                  _fetchPokemon(Uri.https('pokeapi.co', '/api/v2/pokemon'));
+                  ref
+                      .read(pokemonStateProvider.notifier)
+                      .fetchPokemon(Uri.https('pokeapi.co', '/api/v2/pokemon'));
                 }
               },
               child: ListView.builder(
-                itemCount: _pokemons.length,
+                itemCount: pokemon.pokemons.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text('${_pokemons[index].name}'),
+                    title: Text('${pokemon.pokemons[index].name}'),
                     tileColor: Colors.greenAccent,
                   );
                 },
