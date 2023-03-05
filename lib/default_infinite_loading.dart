@@ -51,7 +51,7 @@ class _DefaultInfiniteLoadingState extends State<DefaultInfiniteLoading> {
             )
           : RefreshIndicator(
               onRefresh: () async {
-                if (_nextPageLink != null && _nextPageLink != null) {
+                if (_nextPageLink != null) {
                   _fetchPokemon(Uri.parse(_nextPageLink!));
                 } else {
                   _fetchPokemon(Uri.https('pokeapi.co', '/api/v2/pokemon'));
