@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 final pokemonStateProvider =
     StateNotifierProvider.autoDispose<PokemonStateProvider, PokemonState>(
         (ref) {
-  return PokemonStateProvider();
+  return PokemonStateProvider(ref);
 });
 
 @immutable
@@ -22,7 +22,9 @@ class PokemonState {
 }
 
 class PokemonStateProvider extends StateNotifier<PokemonState> {
-  PokemonStateProvider() : super(const PokemonState());
+  PokemonStateProvider(this.ref) : super(const PokemonState());
+
+  final Ref ref;
 
   void fetchPokemon(Uri uri) async {
     http.Response _res = await http.get(uri);
